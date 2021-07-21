@@ -777,7 +777,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd8c26738d7b57b4289e84bb2c754cdc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  anwser: 
+  sentences:
+  - The first task will be to find the three numbers that have the sum and product
+    of
+  - Congratulations! You have broke the game!
+  - You have been compremised!
   DialogText: {fileID: 898338279}
   inputField: {fileID: 246548509}
 --- !u!4 &1771400964

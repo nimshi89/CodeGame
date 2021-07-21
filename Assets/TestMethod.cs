@@ -3,42 +3,78 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class TestMethod : MonoBehaviour
 {
     // Start is called before the first frame update
     private string input;
+    private float wait = 2f;
     private int[] anwsers;
+    public string[] sentences;
     private int taskSum;
     private int taskProduct;
     private int playerSum;
     private int playerProduct;
+    private int Index = 0;
+    private int numberOTry = 0;
+    private int maxNumberOTry = 3;
+    private int difficulty = 0;
+    private int maxDifficulty = 3;
+    private float textSpeed = 0.05f;
     public TextMeshProUGUI DialogText;
     public GameObject inputField;
 
     void Start()
     {
         GenerateTask();
-        GiveTask();     //staring the ghame with printing out the first task
+        StartCoroutine(GiveTask());     //staring the ghame with printing out the first task
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (numberOTry >= maxNumberOTry)
+        {
+            Index = 2;
+            StopCoroutine(GiveTask());
+            DialogText.text = string.Empty;
+            input = string.Empty;
+            StartCoroutine(Ending());
+        }
+        if (difficulty > maxDifficulty)
+        {
+            Index = 1;
+            StopCoroutine(GiveTask());
+            DialogText.text = string.Empty;
+            input = string.Empty;
+            StartCoroutine(Ending());
+        }
         if (Input.GetKeyDown(KeyCode.Return)) {             //check for condition(player hits enter)
 
+            if (difficulty <= maxDifficulty && numberOTry <= maxNumberOTry) {
 
-            StoreAnwser();      //first store the anwser
-
-
-            if (CheckAnwsers() == true)      //if condition is met display message to player
-            {
-
-                DialogText.text = "GREAT JOB!";
+                StoreAnwser();      //first store the anwser
 
 
+                if (CheckAnwsers())      //if condition is met display message to player
+                {
+                    print("Yeah");
+                    DialogText.text = "GREAT JOB!";
+                    Wait();
+                    StopCoroutine(GiveTask());
+                    difficulty++;
+                    NextLevel();
+                }
+                else
+                {
+                    print("Nope");
+                    DialogText.text = "NOPE!";
+                    Wait();
+                    numberOTry++;
+                    TryAgain();
+                }
             }
-            else { DialogText.text = "NOPE!"; }
 
         }
 
@@ -62,10 +98,31 @@ public class TestMethod : MonoBehaviour
         }
 
     }
-    void GiveTask() {       //printing task to the screen
+    IEnumerator GiveTask() {       //printing task to the screen
 
-        DialogText.text = "Welcome!\nThe first task will be to find the three numbers that have the sum and product of " + taskSum.ToString() + " and " + taskProduct.ToString();
-    
+        foreach (char Character in sentences[Index].ToCharArray())
+        {
+
+            DialogText.text += Character;
+            yield return new WaitForSeconds(textSpeed);
+
+        }
+        DialogText.text += " " + taskSum.ToString() + " and " + taskProduct.ToString();
+    }
+    IEnumerator Wait() {
+
+        yield return new WaitForSeconds(wait);
+    }
+    IEnumerator Ending()
+    {
+        print("Call");
+        foreach (char Character in sentences[Index].ToCharArray())
+        {
+
+            DialogText.text += Character;
+            yield return new WaitForSeconds(textSpeed);
+
+        }
     }
 
     void StoreAnwser() {        //stroring input from player in public variable
@@ -91,16 +148,23 @@ public class TestMethod : MonoBehaviour
 
     bool CheckAnwsers() {       //if codition is met returns a true value otherwise false
 
-        if (playerSum == taskSum && playerProduct == taskProduct)       //if the 2 values match that is a win
-        {
-            return true;
-        }
-        else 
-        {
-            return false; 
-        }
-    
+        //return (playerSum == taskSum && playerProduct == taskProduct);       //if the 2 values match that is a win
+        return false;
+    }
+    void NextLevel() {
+
+        input = string.Empty;
+        DialogText.text = string.Empty;
+        GenerateTask();
+        StartCoroutine(GiveTask());
     
     }
-   
+    void TryAgain()
+    {
+
+        input = string.Empty;
+        DialogText.text = string.Empty;
+        StartCoroutine(GiveTask());
+
+    }
 }
