@@ -22,6 +22,8 @@ public class TestMethod : MonoBehaviour
     private int difficulty = 0;
     private int maxDifficulty = 3;
     private float textSpeed = 0.05f;
+    private bool gameIsPaused = false;
+    private bool gameRunning = false;
     public TextMeshProUGUI DialogText;
     public GameObject inputField;
 
@@ -34,54 +36,71 @@ public class TestMethod : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (numberOTry >= maxNumberOTry)
-        {
-            Index = 2;
-            StopCoroutine(GiveTask());
-            DialogText.text = string.Empty;
-            input = string.Empty;
-            StartCoroutine(Ending());
-        }
-        if (difficulty > maxDifficulty)
-        {
-            Index = 1;
-            StopCoroutine(GiveTask());
-            DialogText.text = string.Empty;
-            input = string.Empty;
-            StartCoroutine(Ending());
-        }
-        if (Input.GetKeyDown(KeyCode.Return)) {             //check for condition(player hits enter)
+        if (gameRunning) {
 
-            if (difficulty <= maxDifficulty && numberOTry <= maxNumberOTry) {
-
-                StoreAnwser();      //first store the anwser
+            if (numberOTry >= maxNumberOTry)
+            {
+                Index = 2;
+                StopCoroutine(GiveTask());
+                DialogText.text = string.Empty;
+                input = string.Empty;
+                StartCoroutine("Ending");
+            }
+            if (difficulty > maxDifficulty)
+            {
+                Index = 1;
+                StopCoroutine(GiveTask());
+                DialogText.text = string.Empty;
+                input = string.Empty;
+                StartCoroutine(Ending());
+            }
+            if (Input.GetKeyDown(KeyCode.Escape)) {
 
 
-                if (CheckAnwsers())      //if condition is met display message to player
+                if (gameIsPaused)
                 {
-                    print("Yeah");
-                    DialogText.text = "GREAT JOB!";
-                    Wait();
-                    StopCoroutine(GiveTask());
-                    difficulty++;
-                    NextLevel();
+                    ResumeGame();
                 }
                 else
                 {
-                    print("Nope");
-                    DialogText.text = "NOPE!";
-                    Wait();
-                    numberOTry++;
-                    TryAgain();
+                    PauseGame();
                 }
-            }
 
+            }
+            if (Input.GetKeyDown(KeyCode.Return)) {             //check for condition(player hits enter)
+
+                if (difficulty <= maxDifficulty && numberOTry <= maxNumberOTry) {
+
+                    StoreAnwser();      //first store the anwser
+
+
+                    if (CheckAnwsers())      //if condition is met display message to player
+                    {
+                        print("Yeah");
+                        DialogText.text = "GREAT JOB!";
+                        Wait();
+                        StopCoroutine(GiveTask());
+                        difficulty++;
+                        NextLevel();
+                    }
+                    else
+                    {
+                        print("Nope");
+                        DialogText.text = "NOPE!";
+                        Wait();
+                        numberOTry++;
+                        TryAgain();
+                    }
+                }
+
+            }
         }
 
     }
 
     void GenerateTask() {       //generating random numbers for the task
 
+        gameRunning = true;
         for (int i = 0; i < 3; i++) {
 
             int number = Random.Range(0, 20);
@@ -123,6 +142,8 @@ public class TestMethod : MonoBehaviour
             yield return new WaitForSeconds(textSpeed);
 
         }
+        gameRunning = false;
+        StopAllCoroutines();
     }
 
     void StoreAnwser() {        //stroring input from player in public variable
@@ -166,5 +187,17 @@ public class TestMethod : MonoBehaviour
         DialogText.text = string.Empty;
         StartCoroutine(GiveTask());
 
+    }
+
+    void PauseGame()
+    {
+        Time.timeScale = 0;
+        gameIsPaused = true;
+    }
+
+    void ResumeGame()
+    {
+        Time.timeScale = 1;
+        gameIsPaused = false;
     }
 }
